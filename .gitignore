@@ -1,0 +1,11 @@
+# Донор-проект (C/MSX)
+kingsvalley/
+
+# macOS
+.DS_Store
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
