@@ -16,6 +16,7 @@ import { getTileIndex, updateMapDataByPosition } from './gameUtil.js';
 import { putGateTiles } from './gate.js';
 import { isIntersectRect } from './gameUtil.js';
 
+/** Sets entity state and optionally movetype, resets frame and delay. */
 function changeObjectState(entity, state, movetype) {
   entity.state = state;
   entity.movetype = movetype ?? entity.movetype;
@@ -23,16 +24,19 @@ function changeObjectState(entity, state, movetype) {
   entity.delay = 0;
 }
 
+/** Returns the first entity of the given type or null. */
 function findObjectByType(entities, type) {
   return entities.find(e => e.type === type) || null;
 }
 
+/** Returns the entity at the given tile position in the room or null. */
 function findObjectByTileIndex(entities, roomId, tileX, tileY) {
   const x = tileX * 8;
   const y = tileY * 8;
   return entities.find(e => e.roomId === roomId && e.x === x && e.y === y) || null;
 }
 
+/** Handles tile-based interactions: pickax pickup and gate lock activation. */
 export function processTileObjectInteraction(player, roomData, entities, curRoomId, mapData, onScore) {
   if (player.movetype !== MOVE_NORMAL) return;
   for (let i = 0; i < 2; i++) {
@@ -54,6 +58,7 @@ export function processTileObjectInteraction(player, roomData, entities, curRoom
   }
 }
 
+/** Handles entity interactions: jewel collection, knife pickup, exit trigger. */
 export function processObjectInteraction(player, roomData, entities, curRoomId, mapData, jewelsCount, onJewelCollect, onExit, onPlayEffect) {
   for (const obj of entities) {
     if (obj.state === 3 || obj.roomId !== curRoomId) continue;
@@ -99,6 +104,7 @@ export function processObjectInteraction(player, roomData, entities, curRoomId, 
   }
 }
 
+/** Updates player: reads input, updates character, processes tile and object interactions. */
 export function updatePlayer(entity, roomData, ctx) {
   const control = getControl();
   const { entities, mapData, curRoomId, playerInfo, jewelsCount, findEntity, roomCount, onJewelCollect, onExit, onPlayEffect } = ctx;

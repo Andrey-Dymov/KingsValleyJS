@@ -17,7 +17,7 @@ import { renderHUD } from './hud.js';
 import { updateMapDataByPosition, isMapBlocked } from './gameUtil.js';
 import { updateExit, putGateTiles } from './gate.js';
 import { initAudio, playMusic, stopMusic, playEffect } from './audio.js';
-import { ET_PLAYER, ET_KNIFE, ET_JEWEL, ET_ENEMY, ET_TRAP, ET_PUSHDOOR, ET_EXIT, GAMEOVER_DELAY, MAX_LIVES, SONG_GAME_START, SONG_IN_GAME, SONG_GAME_OVER, EFX_START, EFX_DOOR, EFX_DIG, EFX_HIT, EFX_DEAD, GATE_LOCK_UP_TILE } from './constants.js';
+import { ET_PLAYER, ET_KNIFE, ET_JEWEL, ET_ENEMY, ET_TRAP, ET_PUSHDOOR, ET_EXIT, GAMEOVER_DELAY, MAX_LIVES, SONG_GAME_START, SONG_IN_GAME, SONG_GAME_OVER, EFX_START, EFX_DOOR, EFX_DIG, EFX_HIT, EFX_DEAD, GATE_LOCK_UP_TILE, FRAME_WAIT } from './constants.js';
 
 const GAME_W = 256;
 const GAME_H = 184;
@@ -46,6 +46,7 @@ let exitGate = null;      // { roomId, tileX, tileY } для катсцены в
 let screenDelay = 0;
 let exitCount = 0;
 
+/** Adjusts canvas size and scale to fit the window while keeping game resolution. */
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
@@ -56,10 +57,12 @@ function resize() {
   canvas.style.height = (GAME_H * scale) + 'px';
 }
 
+/** Finds an entity in the entities array by its identifier. */
 function findEntity(id) {
   return entities.find(e => e.identifier === id) || null;
 }
 
+/** Handles player death: decrements lives, plays effect, switches to gameover or reset state. */
 function playerDie() {
   lives--;
   invuln = 64; // INVUL_TIME
@@ -75,6 +78,7 @@ function playerDie() {
   }
 }
 
+/** Main game loop tick: updates game state, entities, and handles all state transitions. */
 function tick() {
   if (gameState === 'title') {
     if ((getControl() & 16) || (getControl() & 8) || (getControl() & 4)) {
@@ -252,9 +256,12 @@ function tick() {
           (rd, x, y, tile) => updateMapDataByPosition(rd, x, y, tile),
           playEffect);
       }
-    } else if (e.type === ET_JEWEL) {
+    } else if (e.type === ET_JEWEL && e.roomId === curRoomId) {
       e.delay = (e.delay || 0) + 1;
-      if (e.delay >= 2) { e.delay = 0; e.frame = (e.frame + 1) & 0xFF; }
+      if (e.delay === FRAME_WAIT) {
+        e.delay = 0;
+        e.frame = (e.frame + 1) % FRAME_WAIT;
+      }
     } else if (e.type === ET_ENEMY) {
       const enemyRoom = mapData.rooms[e.roomId];
       if (enemyRoom) {
@@ -266,6 +273,7 @@ function tick() {
   }
 }
 
+/** Loads a level by parsing map data, initializing entities and setting up the player. */
 function loadLevel(stageNum) {
   const rawMap = assets.mapData[`map${stageNum}`];
   if (!rawMap) return false;
@@ -291,6 +299,7 @@ function loadLevel(stageNum) {
   return true;
 }
 
+/** Draws a full-screen text overlay with main text and optional subtext. */
 function drawTextScreen(text, subtext = '') {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, GAME_W, GAME_H);
@@ -302,6 +311,7 @@ function drawTextScreen(text, subtext = '') {
   ctx.textAlign = 'left';
 }
 
+/** Main render loop: accumulates time, runs tick, draws current game state, requests next frame. */
 function loop(now = 0) {
   acc += Math.min(0.05, (performance.now() - (loop.last || now)) / 1000);
   loop.last = performance.now();
@@ -344,6 +354,7 @@ function loop(now = 0) {
   requestAnimationFrame(loop);
 }
 
+/** Initializes canvas, input, audio, loads assets and starts the game loop. */
 async function init() {
   canvas = document.getElementById('game-canvas');
   ctx = canvas.getContext('2d');

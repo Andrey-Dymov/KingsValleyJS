@@ -4,23 +4,21 @@
 
 import { MAP_W, MAP_H } from './constants.js';
 
+/** Finds a layer by name in Tiled JSON data, throws if not found. */
 function findLayer(data, name) {
   const layer = data.layers?.find(l => l.name === name);
   if (!layer) throw new Error(`Layer "${name}" not found`);
   return layer;
 }
 
+/** Finds a tileset by name in Tiled JSON data, throws if not found. */
 function findTileset(data, name = 'default') {
   const ts = data.tilesets?.find(t => t.name === name);
   if (!ts) throw new Error(`Tileset "${name}" not found`);
   return ts;
 }
 
-/**
- * Парсит карту Tiled JSON в массив комнат (каждая 32×23 тайла)
- * @param {Object} data - JSON карты
- * @returns {{ rooms: number[][][], firstGid: number, roomCount: number }}
- */
+/** Parses Tiled JSON map into array of rooms (each 32×23 tiles). */
 export function parseMap(data) {
   const mapLayer = findLayer(data, 'Map');
   const tileset = findTileset(data);
@@ -55,12 +53,7 @@ export function parseMap(data) {
   return { rooms, firstGid, roomCount };
 }
 
-/**
- * Парсит слой Entities в массив объектов
- * @param {Object} data - JSON карты
- * @param {number} roomCount - количество комнат
- * @returns {Object[]}
- */
+/** Parses Entities layer into array of entity objects with room and type info. */
 export function parseEntities(data, roomCount) {
   let entitiesLayer;
   try {

@@ -24,6 +24,7 @@ const KEY_MAP = {
   Escape: CTL_EXIT,
 };
 
+/** Adds key mask to pressed keys state on keydown. */
 function onKeyDown(e) {
   const mask = KEY_MAP[e.code];
   if (mask) {
@@ -32,6 +33,7 @@ function onKeyDown(e) {
   }
 }
 
+/** Removes key mask from pressed keys state on keyup. */
 function onKeyUp(e) {
   const mask = KEY_MAP[e.code];
   if (mask) {
@@ -40,11 +42,13 @@ function onKeyUp(e) {
   }
 }
 
+/** Registers keyboard event listeners for game input. */
 export function initInput() {
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
 }
 
+/** Returns the current bitmask of pressed control keys. */
 export function getControl() {
   return keys;
 }

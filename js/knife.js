@@ -11,10 +11,12 @@ const KNIFE_SPEED = 3;
 const ROOM_MAX_Y = (MAP_H * 8) - 1;  // 183 — без & 0xFF, чтобы не переносить кинжал наверх
 const HEIGHT_VARIATION = [1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1];
 
+/** Returns true if the tile is a static object (knife, pickax, jewel pickup spot). */
 function isStaticObject(tileIndex) {
   return tileIndex === 75 || tileIndex === 76 || tileIndex === 134; // KNIFE_TILE, PICKAX_TILE, JEWEL_TILE
 }
 
+/** Switches knife to fall state and sets bounce direction based on collision type. */
 function initKnifeFall(knife, collisionType) {
   knife.state = PS_FALL;
   knife.dir ^= 1;
@@ -25,6 +27,7 @@ function initKnifeFall(knife, collisionType) {
   knife.extra2 += knife.dir ? -(knife.x % 8) : ((knife.x % 8) ? 8 - (knife.x % 8) : 0);
 }
 
+/** Updates knife: handles attack flight or fall animation based on state. */
 export function updateKnife(knife, mapData, entities, curRoomId, onEnemyKill, updateMapTile, onPlayEffect) {
   if (knife.state === PS_IDLE) return;
   const roomCount = mapData?.roomCount ?? 1;
@@ -42,6 +45,7 @@ export function updateKnife(knife, mapData, entities, curRoomId, onEnemyKill, up
   }
 }
 
+/** Moves thrown knife in flight, checks collisions with walls and enemies. */
 function processKnifeAttack(knife, roomData, entities, roomCount, onEnemyKill, onPlayEffect) {
   const offset = knife.dir ? 0 : 7;
   let nextX = knife.x;
@@ -74,6 +78,7 @@ function processKnifeAttack(knife, roomData, entities, roomCount, onEnemyKill, o
   }
 }
 
+/** Handles knife fall: arc trajectory, landing, and placing knife tile on ground. */
 function processKnifeFall(knife, mapData, curRoomId, roomCount, updateMapTile) {
   const roomData = mapData?.rooms?.[knife.roomId];
   if (!roomData) return;

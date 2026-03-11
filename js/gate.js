@@ -12,6 +12,7 @@ const GATE_TILES = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
+/** Writes gate animation tiles to the room at the given position for the given step. */
 export function putGateTiles(roomData, tileX, tileY, step) {
   const tiles = GATE_TILES[step] || GATE_TILES[0];
   for (let i = 0; i < 12; i++) {
@@ -21,6 +22,7 @@ export function putGateTiles(roomData, tileX, tileY, step) {
   }
 }
 
+/** Updates exit gate: animates lock tile blink when exit is active. */
 export function updateExit(exit, roomData, curRoomId) {
   if (exit.roomId !== curRoomId || exit.state !== 2) return; // PS_ATTACK
   const tileX = exit.x >> 3;

@@ -4,6 +4,7 @@
 
 const BASE = 'assets';
 
+/** Loads an image from URL and returns a promise that resolves when loaded. */
 async function loadImage(src) {
   const img = new Image();
   img.src = src;
@@ -14,12 +15,14 @@ async function loadImage(src) {
   return img;
 }
 
+/** Fetches and parses a JSON file from URL. */
 async function loadJson(src) {
   const res = await fetch(src);
   if (!res.ok) throw new Error(`Failed to load JSON: ${src}`);
   return res.json();
 }
 
+/** Fetches and decodes an audio file into an AudioBuffer. */
 async function loadAudioBuffer(ctx, src) {
   const res = await fetch(src);
   if (!res.ok) throw new Error(`Failed to load audio: ${src}`);
@@ -27,6 +30,7 @@ async function loadAudioBuffer(ctx, src) {
   return ctx.decodeAudioData(arrayBuffer);
 }
 
+/** Loads all game assets: sprites, map JSONs, returns images and mapData. */
 export async function loadAllAssets() {
   const sprites = [
     'tiles', 'p_move', 'p_knife', 'p_pickax', 'p_attack', 'p_dig',

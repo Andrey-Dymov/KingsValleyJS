@@ -2,6 +2,7 @@
  * HUD — счёт, жизни, уровень
  */
 
+/** Renders the HUD: score, lives and stage number. */
 export function renderHUD(ctx, playerInfo, lives, stage) {
   ctx.fillStyle = '#fff';
   ctx.font = '8px monospace';

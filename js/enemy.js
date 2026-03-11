@@ -14,6 +14,7 @@ import { isIntersectRect } from './gameUtil.js';
 
 const CTL_UP = 1; const CTL_DOWN = 2; const CTL_LEFT = 4; const CTL_RIGHT = 8; const CTL_FIRE1 = 16;
 
+/** Updates enemy: common state, AI control, character logic, and player collision. */
 export function updateEnemy(enemy, roomData, player, entities, roomCount, onPlayerDie, invuln = 0, gameoverDelay = 0) {
   updateCommonState(enemy);
   const control = getEnemyControl(enemy, roomData, player);
@@ -28,6 +29,7 @@ export function updateEnemy(enemy, roomData, player, entities, roomCount, onPlay
   }
 }
 
+/** Handles enemy spawn (PS_NONE) and death (PS_DEAD) state transitions. */
 function updateCommonState(enemy) {
   if (enemy.state === PS_NONE) {
     enemy.delay = (enemy.delay || 0) + 1;
@@ -50,6 +52,7 @@ function updateCommonState(enemy) {
   }
 }
 
+/** Checks if enemy overlaps player and triggers death callback if so. */
 function processIntersectPlayer(enemy, player, onPlayerDie) {
   if (player.roomId !== enemy.roomId) return;
   if (player.state === PS_STAIR && enemy.state !== PS_STAIR) return;
@@ -61,6 +64,7 @@ function processIntersectPlayer(enemy, player, onPlayerDie) {
   }
 }
 
+/** STATIC enemy strategy: periodically flips direction. */
 function strategyLookAround(enemy) {
   enemy.frame = 3;
   enemy.delay = (enemy.delay || 0) + 1;
@@ -71,6 +75,7 @@ function strategyLookAround(enemy) {
   return 0;
 }
 
+/** MOVE enemy strategy: walks in current direction, jumps when blocked. */
 function strategyMove(enemy, roomData) {
   let ctrl = enemy.dir ? CTL_LEFT : CTL_RIGHT;
   const xOff = enemy.dir ? -1 : 8;
@@ -83,6 +88,7 @@ function strategyMove(enemy, roomData) {
   return ctrl;
 }
 
+/** Prevents enemy from walking off ledge: reverses or jumps when no floor ahead. */
 function strategyNoFall(enemy, roomData, baseCtrl) {
   const xOff = enemy.dir ? -8 : 8;
   if (!checkFloor(roomData, enemy.x + xOff, enemy.y + 16, 6) && !checkFloor(roomData, enemy.x + xOff, enemy.y + 24, 6)) {
@@ -93,6 +99,7 @@ function strategyNoFall(enemy, roomData, baseCtrl) {
   return baseCtrl;
 }
 
+/** Stair strategy: adds up/down input when enemy is near stairs and player is above/below. */
 function strategyStair(enemy, roomData, player, baseCtrl) {
   if (enemy.state !== PS_MOVE) return baseCtrl;
   if (!(enemy.flags & 64)) {
@@ -113,6 +120,7 @@ function strategyStair(enemy, roomData, player, baseCtrl) {
   return baseCtrl;
 }
 
+/** Returns control bitmask for enemy based on subtype and current strategy. */
 function getEnemyControl(enemy, roomData, player) {
   if (enemy.state === PS_NONE || enemy.state === PS_DEAD) return 0;
   const subtype = enemy.subtype;

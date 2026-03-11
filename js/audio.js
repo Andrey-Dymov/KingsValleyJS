@@ -11,12 +11,14 @@ let ctx = null;
 const buffers = {};
 const sources = {};
 
+/** Creates or returns the Web Audio context (requires user gesture). */
 async function initContext() {
   if (ctx) return ctx;
   ctx = new (window.AudioContext || window.webkitAudioContext)();
   return ctx;
 }
 
+/** Loads and decodes a WAV file into an audio buffer. */
 async function loadWav(url) {
   const c = await initContext();
   const res = await fetch(url);
@@ -24,7 +26,7 @@ async function loadWav(url) {
   return buf;
 }
 
-// TEMP: generated — простые тональные эффекты
+/** Plays a short tone using Web Audio oscillator (for generated sound effects). */
 function playTone(freq, duration, type = 'square') {
   if (!ctx) return;
   const osc = ctx.createOscillator();
@@ -39,6 +41,7 @@ function playTone(freq, duration, type = 'square') {
   osc.stop(ctx.currentTime + duration);
 }
 
+/** Loads all WAV audio files from the given base path. */
 export async function loadAudio(basePath = 'assets/audio') {
   const c = await initContext();
   try {
@@ -52,6 +55,7 @@ export async function loadAudio(basePath = 'assets/audio') {
   return true;
 }
 
+/** Sets up audio: loads on first user click (browser autoplay policy). */
 export function initAudio() {
   document.body.addEventListener('click', async () => {
     await initContext();
@@ -59,6 +63,7 @@ export function initAudio() {
   }, { once: true });
 }
 
+/** Plays a music track by ID, stopping any current music first. */
 export function playMusic(song) {
   if (!ctx) return;
   stopMusic();
@@ -72,6 +77,7 @@ export function playMusic(song) {
   sources.music = src;
 }
 
+/** Stops the currently playing music. */
 export function stopMusic() {
   if (sources.music) {
     try { sources.music.stop(); } catch (_) {}
@@ -79,6 +85,7 @@ export function stopMusic() {
   }
 }
 
+/** Plays a sound effect by ID (WAV or generated tone). */
 export function playEffect(effect) {
   if (!ctx) return;
   if (effect === EFX_DEAD && buffers.caught) {

@@ -7,12 +7,7 @@ import { MAP_W, MAP_H } from './constants.js';
 const TILE_SIZE = 8;
 const TILESET_COLS = 32;
 
-/**
- * Рисует комнату (32×23 тайлов)
- * @param {CanvasRenderingContext2D} ctx
- * @param {HTMLImageElement} tilesImg
- * @param {number[]} roomData - массив тайлов (0-based индексы)
- */
+/** Draws a room by rendering all tiles from roomData using the tileset image. */
 export function renderRoom(ctx, tilesImg, roomData) {
   for (let i = 0; i < roomData.length; i++) {
     const tileIdx = roomData[i] & 0xFF;

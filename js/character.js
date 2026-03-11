@@ -24,6 +24,7 @@ import {
 const JUMP_VELOCITY = 6;
 const ROOM_MAX_Y = (MAP_H * 8) - 1;  // 183 — верхняя граница, чтобы не вылетать за экран
 
+/** Sets entity state and optionally movetype, resets frame and delay. */
 function changeState(entity, state, movetype) {
   entity.state = state;
   entity.movetype = movetype ?? entity.movetype;
@@ -31,6 +32,7 @@ function changeState(entity, state, movetype) {
   entity.delay = 0;
 }
 
+/** Updates falling entity: moves down until floor is hit, then switches to IDLE. */
 export function updateCharacterFall(entity, roomData) {
   const nextY = (entity.y + 4) & 0xFF;
   if (checkFloor(roomData, entity.x, nextY + 16, 7)) {
@@ -41,18 +43,21 @@ export function updateCharacterFall(entity, roomData) {
   entity.y = nextY;
 }
 
+/** Moves entity one pixel left if path is not blocked. */
 function moveLeft(entity, roomData) {
   if (isMapBlocked(roomData, entity.x, entity.y + 15) || isMapBlocked(roomData, entity.x, entity.y + 7))
     return;
   entity.x = (entity.x - 1) & 0xFF;
 }
 
+/** Moves entity one pixel right if path is not blocked. */
 function moveRight(entity, roomData) {
   if (isMapBlocked(roomData, entity.x + 8, entity.y + 15) || isMapBlocked(roomData, entity.x + 8, entity.y + 7))
     return;
   entity.x = (entity.x + 1) & 0xFF;
 }
 
+/** Processes left movement action: sets direction and moves left if not blocked. */
 function processActionLeft(entity, roomData) {
   if (isMapBlocked(roomData, entity.x - 1, entity.y + 15) || isMapBlocked(roomData, entity.x - 1, entity.y + 7))
     return;
@@ -60,6 +65,7 @@ function processActionLeft(entity, roomData) {
   entity.x = (entity.x - 1) & 0xFF;
 }
 
+/** Processes right movement action: sets direction and moves right if not blocked. */
 function processActionRight(entity, roomData) {
   if (isMapBlocked(roomData, entity.x + 8, entity.y + 15) || isMapBlocked(roomData, entity.x + 8, entity.y + 7))
     return;
@@ -67,6 +73,7 @@ function processActionRight(entity, roomData) {
   entity.x = (entity.x + 1) & 0xFF;
 }
 
+/** Initiates digging state when pickax hits a diggable tile above solid ground. */
 function processDigging(entity, roomData, playerInfo = {}) {
   let posX = entity.x;
   if (entity.dir === DIR_LEFT) {
@@ -85,6 +92,7 @@ function processDigging(entity, roomData, playerInfo = {}) {
   playerInfo.digging_count = 0;
 }
 
+/** Maps control input bits to a character action (move, jump, attack, stair, etc). */
 function getCharacterAction(entity, control) {
   const right = !!(control & 8);
   const left = !!(control & 4);
@@ -115,6 +123,7 @@ function getCharacterAction(entity, control) {
   return ACTION_IDLE;
 }
 
+/** Handles stair climbing: moves entity up/down on stair tiles when action is valid. */
 function processStairAction(entity, roomData, control, action) {
   if (entity.state === PS_MOVE) {
     if (entity.dir === DIR_LEFT) moveLeft(entity, roomData);
@@ -157,6 +166,7 @@ function processStairAction(entity, roomData, control, action) {
   }
 }
 
+/** Updates idle character: handles stair input, movement start, jump and attack/dig. */
 export function updateCharacterIdle(entity, roomData, control, playerInfo = {}) {
   const up = !!(control & 1);
   const down = !!(control & 2);
@@ -197,6 +207,7 @@ export function updateCharacterIdle(entity, roomData, control, playerInfo = {}) 
   }
 }
 
+/** Updates moving character: walk animation, actions, and fall detection. */
 export function updateCharacterMove(entity, roomData, control, playerInfo = {}) {
   if (entity.delay++ === FRAME_WAIT) {
     entity.delay = 0;
@@ -237,10 +248,12 @@ export function updateCharacterMove(entity, roomData, control, playerInfo = {}) 
   }
 }
 
+/** Returns true if either tile at x or x+7 is blocked by solid tile. */
 function isBlocked(roomData, x, y) {
   return isMapBlocked(roomData, x, y) || isMapBlocked(roomData, x + 7, y);
 }
 
+/** Updates jump: applies velocity, handles horizontal movement, collision and fall transition. */
 export function updateCharacterJump(entity, roomData) {
   let nextX = entity.x;
   let nextY = entity.y + entity.extra2;
@@ -270,6 +283,7 @@ export function updateCharacterJump(entity, roomData) {
   if (entity.extra2 < JUMP_VELOCITY) entity.extra2++;
 }
 
+/** Updates character on stairs: moves up/down along stair tiles based on control input. */
 export function updateCharacterStair(entity, roomData, control) {
   const moveOffset = (entity.flags & 128) ? 2 : 1;
   let nextX = entity.x, nextY = entity.y;
@@ -298,6 +312,7 @@ export function updateCharacterStair(entity, roomData, control) {
   }
 }
 
+/** Updates attack state: after wind-up delay, launches knife and returns to idle. */
 export function updateCharacterAttack(entity, entities, findEntity) {
   if (entity.delay++ !== 4) return;
   entity.delay = 0;
@@ -319,6 +334,7 @@ export function updateCharacterAttack(entity, entities, findEntity) {
   changeState(entity, PS_IDLE, MOVE_NORMAL);
 }
 
+/** Updates digging: animates tile break, plays effect, switches to fall when done. */
 export function updateCharacterDigging(entity, roomData, playerInfo, onPlayEffect) {
   if (entity.delay++ !== 4) return;
   entity.delay = 0;
@@ -343,6 +359,7 @@ export function updateCharacterDigging(entity, roomData, playerInfo, onPlayEffec
   }
 }
 
+/** Updates movable door push animation: draws door tiles and moves entity to destination. */
 export function updateCharacterMovableDoor(entity, roomData) {
   const x = entity.extra;
   const y = entity.y + 8;
@@ -391,6 +408,7 @@ export function updateCharacterMovableDoor(entity, roomData) {
   }
 }
 
+/** Handles room transition when entity crosses left/right screen boundary during move or jump. */
 export function updateCharacterRoom(entity, roomCount) {
   if (entity.state === PS_JUMP || entity.state === PS_MOVE) {
     if (entity.dir === DIR_RIGHT) {
@@ -407,6 +425,7 @@ export function updateCharacterRoom(entity, roomCount) {
   }
 }
 
+/** Main character update dispatcher: calls the appropriate handler for current state. */
 export function updateCharacter(entity, roomData, control, ctx = {}) {
   const { playerInfo = {}, entities = [], findEntity = () => null, roomCount = 1, onPlayEffect } = ctx;
   switch (entity.state) {

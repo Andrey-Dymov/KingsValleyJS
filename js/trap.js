@@ -7,6 +7,7 @@ import { SOLID_TILE, SOLID_TILE2 } from './constants.js';
 import { updateMapDataByPosition } from './gameUtil.js';
 import { isIntersectRect } from './gameUtil.js';
 
+/** Updates trap: activates when player is in column, then extends solid tiles upward. */
 export function updateTrap(trap, player, roomData, curRoomId) {
   if (trap.roomId !== curRoomId || trap.state === PS_DEAD) return;
   if (trap.state === PS_IDLE) {

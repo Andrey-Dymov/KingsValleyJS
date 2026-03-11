@@ -10,6 +10,7 @@ import {
 } from './constants.js';
 import { getTileIndex, updateMapDataByPosition } from './gameUtil.js';
 
+/** Creates an entity object from parsed data with default values. */
 export function createEntity(data) {
   return {
     type: data.type ?? 0,
@@ -41,6 +42,7 @@ export function createEntity(data) {
   };
 }
 
+/** Initializes entities array from parsed map data, applying type-specific setup. */
 export function initMapEntities(entities, parsedEntities, assets) {
   entities.length = 0;
 
@@ -91,7 +93,7 @@ export function initMapEntities(entities, parsedEntities, assets) {
   }
 }
 
-/** Размещает тайлы толкаемой двери на карте (setup_movable_door) */
+/** Places pushable door tiles on the map and sets door height. */
 export function setupMovableDoor(door, mapData) {
   const roomData = mapData?.rooms?.[door.roomId];
   if (!roomData) return;

@@ -4,6 +4,7 @@
 
 import { PS_MOVE, PS_MOVABLE_DOOR } from './constants.js';
 
+/** Updates pushdoor: detects when player pushes long enough, flips door and triggers push state. */
 export function updatePushdoor(door, player, curRoomId, changePlayerState) {
   if (door.roomId !== curRoomId) return;
   if (player.state !== PS_MOVE) {
